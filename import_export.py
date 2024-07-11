@@ -65,7 +65,7 @@ class ImportExportWindow(QtWidgets.QDialog, FORM_IMPORT_EXPORT_CLASS):
             print("Logout from Skydeck")
             headers = {"Authorization": f"Bearer {self.token}"}
             print("headers: ", headers)
-            response = requests.get(url="https://skydeck-staging.asteria.co.in/auth/logout", headers=headers, allow_redirects=True)
+            response = requests.get(url=f"{ImportExportWindow.endpoint}/auth/logout", headers=headers, allow_redirects=True)
             print(f"Response message from logout: {response}")
             if response.history:
                 print("Request was redirected")
