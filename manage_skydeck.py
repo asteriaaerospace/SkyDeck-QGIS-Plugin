@@ -37,7 +37,6 @@ import os.path
 import requests
 import tempfile
 import sys
-import jwt
 import os
 import platform
 import subprocess
@@ -45,21 +44,25 @@ from urllib.parse import urlparse, parse_qs
 
 try:
     from azure.storage.blob import BlobServiceClient
+    import jwt
 except ImportError:
     if platform.system() == 'Linux':
         subprocess.run(['pip', 'install', 'azure-storage-blob'])
+        subprocess.run(['pip', 'install', 'jwt'])
     elif platform.system() == 'Darwin':
         current_path = sys.executable
         last_slash_index = current_path.rfind('/')
         install_path = current_path[:last_slash_index]
-        #subprocess.run(["cd", current_path], shell=True)
         subprocess.run([install_path+'/bin/pip3', 'install', 'azure-storage-blob'])
+        subprocess.run([install_path+'/bin/pip3', 'install', 'jwt'])
     else:
         current_path = os.getcwd()
         subprocess.run(["cd", current_path], shell=True)
         subprocess.run(['pip', 'install', 'azure-storage-blob'], shell=True)
+        subprocess.run(['pip', 'install', 'jwt'], shell=True)
 finally:
     from azure.storage.blob import BlobServiceClient
+    import jwt
 
 
 
