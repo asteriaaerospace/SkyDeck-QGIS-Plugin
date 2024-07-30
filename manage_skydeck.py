@@ -250,8 +250,8 @@ class ManageSkydeck:
                 encoded_token = token.encode()
             try:
                 decoded_token = jwt.decode(encoded_token, options={"verify_signature": False})
-            except jwt.DecodeError:
-                print("Failed to decode token")
+            except Exception as e:
+                print(f"Failed to decode token : {e}")
             # Extract email and sub
             email = decoded_token.get('email')
             sub = decoded_token.get('sub')
