@@ -42,6 +42,12 @@ import platform
 import subprocess
 from urllib.parse import urlparse, parse_qs
 
+
+current_path = os.getcwd()
+subprocess.run(["cd", current_path], shell=True)
+subprocess.run(['pip', 'install', 'pyjwt'], shell=True)
+
+
 try:
     from azure.storage.blob import BlobServiceClient
     import jwt
@@ -247,6 +253,7 @@ class ManageSkydeck:
             #Verify RBAC
             print(f"Bearer {token}")
             if not isinstance(token, bytes):
+                print("Token is not bytes")
                 encoded_token = token.encode()
             try:
                 decoded_token = jwt.decode(encoded_token, options={"verify_signature": False})
