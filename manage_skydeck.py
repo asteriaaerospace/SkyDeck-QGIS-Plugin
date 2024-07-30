@@ -272,7 +272,7 @@ class ManageSkydeck:
             print("Clicked on login button")
             self.initial_redirection_done = False
             self.web_view = self.dlg.skydeckwebView
-            self.web_view.load(QUrl(f"{ManageSkydeck.endpoint}/auth/login"))
+            self.web_view.load(QUrl(f"https://skydeck-staging.asteria.co.in/auth/login"))
             self.web_view.urlChanged.connect(self.on_url_changed)
         except Exception as e:
             print(f"Error : {e}")
