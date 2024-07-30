@@ -48,18 +48,18 @@ try:
 except ImportError:
     if platform.system() == 'Linux':
         subprocess.run(['pip', 'install', 'azure-storage-blob'])
-        subprocess.run(['pip', 'install', 'jwt'])
+        subprocess.run(['pip', 'install', 'PyJWT'])
     elif platform.system() == 'Darwin':
         current_path = sys.executable
         last_slash_index = current_path.rfind('/')
         install_path = current_path[:last_slash_index]
         subprocess.run([install_path+'/bin/pip3', 'install', 'azure-storage-blob'])
-        subprocess.run([install_path+'/bin/pip3', 'install', 'jwt'])
+        subprocess.run([install_path+'/bin/pip3', 'install', 'PyJWT'])
     else:
         current_path = os.getcwd()
         subprocess.run(["cd", current_path], shell=True)
         subprocess.run(['pip', 'install', 'azure-storage-blob'], shell=True)
-        subprocess.run(['pip', 'install', 'jwt'], shell=True)
+        subprocess.run(['pip', 'install', 'PyJWT'], shell=True)
 finally:
     from azure.storage.blob import BlobServiceClient
     import jwt
