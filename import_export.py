@@ -43,8 +43,8 @@ FORM_IMPORT_EXPORT_CLASS, _ = uic.loadUiType(os.path.join(
 
 class ImportExportWindow(QtWidgets.QDialog, FORM_IMPORT_EXPORT_CLASS):
 
-    endpoint = "https://skydeck.asteria.co.in"
-    blob_endpoint = "https://skydeckcorefilestrgprd.blob.core.windows.net"
+    endpoint = "https://skydeck-staging.asteria.co.in"
+    blob_endpoint = "https://sdcorefilestrgstg.blob.core.windows.net"
 
     def __init__(self,token, parent=None):
         super(ImportExportWindow, self).__init__(parent)

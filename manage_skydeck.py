@@ -76,8 +76,8 @@ finally:
 class ManageSkydeck:
     """QGIS Plugin Implementation."""
 
-    endpoint = "https://skydeck.asteria.co.in"
-    blob_endpoint = "https://skydeckcorefilestrgprd.blob.core.windows.net"
+    endpoint = "https://skydeck-staging.asteria.co.in"
+    blob_endpoint = "https://sdcorefilestrgstg.blob.core.windows.net"
 
     def __init__(self, iface):
         """Constructor.
