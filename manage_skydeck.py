@@ -249,7 +249,7 @@ class ManageSkydeck:
         if token:
             print("Token is valid")
             self.dlg.close()
-            self.import_export_window = ImportExportWindow(token)
+            self.import_export_window = ImportExportWindow(token, self.web_view)
             #Verify RBAC
             print(f"Bearer {token}")
             if not isinstance(token, bytes):
