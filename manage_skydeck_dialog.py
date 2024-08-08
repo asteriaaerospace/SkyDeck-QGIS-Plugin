@@ -49,10 +49,3 @@ class ManageSkydeckDialog(QtWidgets.QDialog, FORM_CLASS):
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
 
-        #self.open_web_page()
-        # self.importFileListGroupBox.setVisible(False)
-    def closePlugin(self):
-        # Create a new instance of the class, which will call __init__
-        new_instance = ManageSkydeckDialog()
-        # Close the plugin
-        self.close()

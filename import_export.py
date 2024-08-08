@@ -46,10 +46,11 @@ class ImportExportWindow(QtWidgets.QDialog, FORM_IMPORT_EXPORT_CLASS):
     endpoint = "https://skydeck.asteria.co.in"
     blob_endpoint = "https://skydeckcorefilestrgprd.blob.core.windows.net"
 
-    def __init__(self,token, parent=None):
+    def __init__(self,token, webView, parent=None):
         super(ImportExportWindow, self).__init__(parent)
         self.setupUi(self)
         self.token = token
+        self.webView = webView
         print(f" TOKEN RECIEVED ----: {self.token}")
 
 
@@ -63,29 +64,20 @@ class ImportExportWindow(QtWidgets.QDialog, FORM_IMPORT_EXPORT_CLASS):
     def skydeckLogout(self):
         try:
             print("Logout from Skydeck")
-            headers = {"Authorization": f"Bearer {self.token}"}
-            print("headers: ", headers)
-            response = requests.get(url=f"{ImportExportWindow.endpoint}/auth/logout", headers=headers, allow_redirects=True)
-            print(f"Response message from logout: {response}")
-            if response.history:
-                print("Request was redirected")
-                for resp in response.history:
-                    print(resp.status_code, resp.url)
 
-            print("Final destination:")
-            print(response.status_code, response.url)
-
-
-            iface.messageBar().pushMessage(f"Logged out successfully", level=3, duration=5)
             self.clear()
             self.importURL.clear()
             self.exportURL.clear()
             del self.token
-            from .manage_skydeck_dialog import ManageSkydeckDialog
-            dialog = ManageSkydeckDialog()
-            dialog.closePlugin()
-            print("Closed the plugin")
 
+            # Disconnect the signals
+            self.webView.urlChanged.disconnect()
+            self.webView.loadFinished.disconnect()
+
+            self.webView.load(QUrl(f"https://skydeck.asteria.co.in/auth/logout"))
+            iface.messageBar().pushMessage(f"Logged out successfully", level=3, duration=5)
+
+            print("Closed the plugin")
             self.close()
             print("Closed")
         except Exception as e:
