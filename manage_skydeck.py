@@ -216,13 +216,9 @@ class ManageSkydeck:
     
 
     def on_url_changed(self, url):
-        if self.initial_redirection_done:
-            print(f"Bearer  will be processed here")
+        url_string = url.toString()
+        if "insight1.auth0.com" not in url_string:
             self.web_view.loadFinished.connect(self.on_load_finished)
-
-        else:
-            self.initial_redirection_done = True
-            print("Ignoring the first URL change event.")
 
     def on_load_finished(self, ok):
         # This slot is called when the web page has finished loading.
@@ -265,11 +261,11 @@ class ManageSkydeck:
             self.dlg.close()
             if response.json() is not True:
                 print("RBAC Failed")
+                self.import_export_window.skydeckLogout()
                 iface.messageBar().pushMessage(f"UNAUTHORISED USER", level=2, duration=5)
             else:
                 print("RBAC Success")
                 self.import_export_window.show()
-
         else:
             print("No token found")
             iface.messageBar().pushMessage(f"Error in validating the user. Please try after sometime", level=2, duration=5)
@@ -289,7 +285,6 @@ class ManageSkydeck:
     def open_web_page(self):
         try:
             print("Opening Skydeck login page")
-            self.initial_redirection_done = False
             self.web_view = self.dlg.skydeckwebView
             token = self.get_existing_token()
             if token:
