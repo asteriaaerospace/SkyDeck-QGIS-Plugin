@@ -76,8 +76,8 @@ finally:
 class ManageSkydeck:
     """QGIS Plugin Implementation."""
 
-    endpoint = "https://skydeck.asteria.co.in"
-    blob_endpoint = "https://skydeckcorefilestrgprd.blob.core.windows.net"
+    endpoint = "https://skydeck-staging.asteria.co.in"
+    blob_endpoint = "https://sdcorefilestrgstg.blob.core.windows.net"
 
     def __init__(self, iface):
         """Constructor.
@@ -213,11 +213,6 @@ class ManageSkydeck:
             callback=self.run,
             parent=self.iface.mainWindow())
         
-        self.dlg.loginButton.clicked.connect(self.open_web_page)
-        # will be set False in run()
-
-        # self.open_web_page()
-        #self.first_start = True
     
 
     def on_url_changed(self, url):
@@ -248,7 +243,6 @@ class ManageSkydeck:
     def handle_token(self, token):
         if token:
             print("Token is valid")
-            self.dlg.close()
             self.import_export_window = ImportExportWindow(token, self.web_view)
             #Verify RBAC
             print(f"Bearer {token}")
@@ -265,9 +259,10 @@ class ManageSkydeck:
             rbac_data = {"email": email, "sub": sub}
             print(f"Email: {email}, Sub: {sub}")
             headers = {"Authorization": f"Bearer {token}"}
-            response = requests.post(url="https://skydeck.asteria.co.in/api/gis/v1/qgis/rbac", headers=headers, json=rbac_data)
+            response = requests.post(url="https://skydeck-staging.asteria.co.in/api/gis/v1/qgis/rbac", headers=headers, json=rbac_data)
             print(f"Response message from rbac: {response}")
             print(f"Response : {response.json()}")
+            self.dlg.close()
             if response.json() is not True:
                 print("RBAC Failed")
                 iface.messageBar().pushMessage(f"UNAUTHORISED USER", level=2, duration=5)
@@ -280,14 +275,30 @@ class ManageSkydeck:
             iface.messageBar().pushMessage(f"Error in validating the user. Please try after sometime", level=2, duration=5)
             self.dlg.close()
 
+    def get_existing_token(self):
+            frame = self.web_view.page().mainFrame()
+            url = frame.url().toString()
+            print(url)
+            parsed_url = urlparse(url)
+            query_params = parse_qs(parsed_url.query)
+            token = query_params.get('token', [None])[0]
+            print(f"Token: {token}")
+            return token
+    
 
     def open_web_page(self):
         try:
-            print("Clicked on login button")
+            print("Opening Skydeck login page")
             self.initial_redirection_done = False
             self.web_view = self.dlg.skydeckwebView
-            self.web_view.load(QUrl(f"https://skydeck.asteria.co.in/auth/login"))
-            self.web_view.urlChanged.connect(self.on_url_changed)
+            token = self.get_existing_token()
+            if token:
+                print("Token exists")
+                self.handle_token(token)
+            else:
+                self.dlg.show()
+                self.web_view.load(QUrl(f"https://skydeck-staging.asteria.co.in/auth/login"))
+                self.web_view.urlChanged.connect(self.on_url_changed)
         except Exception as e:
             print(f"Error : {e}")
 
@@ -308,15 +319,5 @@ class ManageSkydeck:
         # Only create GUI ONCE in callback, so that it will only load when the plugin is started
         if self.first_start == True:
             self.first_start = False
-            
 
-        # show the dialog
-        self.dlg.show()
-
-        # Run the dialog event loop
-        result = self.dlg.exec_()
-        # See if OK was pressed
-        if result:
-            # Do something useful here - delete the line containing pass and
-            # substitute with your code.
-            pass
+        self.open_web_page()
