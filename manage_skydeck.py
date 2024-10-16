@@ -76,8 +76,8 @@ finally:
 class ManageSkydeck:
     """QGIS Plugin Implementation."""
 
-    endpoint = "https://skydeck-staging.asteria.co.in"
-    blob_endpoint = "https://sdcorefilestrgstg.blob.core.windows.net"
+    endpoint = "https://skydeck.asteria.co.in"
+    blob_endpoint = "https://skydeckcorefilestrgprd.blob.core.windows.net"
 
     def __init__(self, iface):
         """Constructor.
@@ -255,7 +255,7 @@ class ManageSkydeck:
             rbac_data = {"email": email, "sub": sub}
             print(f"Email: {email}, Sub: {sub}")
             headers = {"Authorization": f"Bearer {token}"}
-            response = requests.post(url="https://skydeck-staging.asteria.co.in/api/gis/v1/qgis/rbac", headers=headers, json=rbac_data)
+            response = requests.post(url="https://skydeck.asteria.co.in/api/gis/v1/qgis/rbac", headers=headers, json=rbac_data)
             print(f"Response message from rbac: {response}")
             print(f"Response : {response.json()}")
             self.dlg.close()
@@ -292,7 +292,7 @@ class ManageSkydeck:
                 self.handle_token(token)
             else:
                 self.dlg.show()
-                self.web_view.load(QUrl(f"https://skydeck-staging.asteria.co.in/auth/login"))
+                self.web_view.load(QUrl(f"https://skydeck.asteria.co.in/auth/login"))
                 self.web_view.urlChanged.connect(self.on_url_changed)
         except Exception as e:
             print(f"Error : {e}")
