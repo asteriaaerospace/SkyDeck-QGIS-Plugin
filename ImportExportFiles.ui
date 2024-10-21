@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>../../../Downloads/asterialogo.png</normaloff>../../../Downloads/asterialogo.png</iconset>
+    <normaloff>icon.png</normaloff>icon.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="3" column="0">
@@ -285,7 +285,7 @@
    <item row="1" column="0">
     <widget class="QLabel" name="label_5">
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Generate the integration URL on SkyDeck for your selected snapshot. &lt;/p&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/Neethu-asteria/asteriaaerospace-qgis-plugin&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Click here&lt;/span&gt;&lt;/a&gt; for detailed instructions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Generate the integration URL on SkyDeck for your selected snapshot. &lt;/p&gt;&lt;p&gt;&lt;a href=&quot;https://skydeck-help.asteria.co.in/docs/qgis-integration&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Click here &lt;/span&gt;&lt;/a&gt;for detailed instructions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>
