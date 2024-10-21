@@ -217,7 +217,7 @@ class ManageSkydeck:
 
     def on_url_changed(self, url):
         url_string = url.toString()
-        if "insight1.auth0.com" not in url_string:
+        if "auth.asteria.co.in" not in url_string:
             self.web_view.loadFinished.connect(self.on_load_finished)
 
     def on_load_finished(self, ok):
