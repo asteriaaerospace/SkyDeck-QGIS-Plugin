@@ -43,8 +43,8 @@ FORM_IMPORT_EXPORT_CLASS, _ = uic.loadUiType(os.path.join(
 
 class ImportExportWindow(QtWidgets.QDialog, FORM_IMPORT_EXPORT_CLASS):
 
-    endpoint = "https://skydeck.asteria.co.in"
-    blob_endpoint = "https://skydeckcorefilestrgprd.blob.core.windows.net"
+    endpoint = "https://skydeck-staging.asteria.co.in"
+    blob_endpoint = "https://sdcorefilestrgstg.blob.core.windows.net"
 
     def __init__(self,token, webView, parent=None):
         super(ImportExportWindow, self).__init__(parent)
@@ -74,7 +74,7 @@ class ImportExportWindow(QtWidgets.QDialog, FORM_IMPORT_EXPORT_CLASS):
             self.webView.urlChanged.disconnect()
             self.webView.loadFinished.disconnect()
 
-            self.webView.load(QUrl(f"https://skydeck.asteria.co.in/auth/logout"))
+            self.webView.load(QUrl(f"{ImportExportWindow.endpoint}/auth/logout"))
             iface.messageBar().pushMessage(f"Logged out successfully", level=3, duration=5)
 
             print("Closed the plugin")
@@ -102,7 +102,6 @@ class ImportExportWindow(QtWidgets.QDialog, FORM_IMPORT_EXPORT_CLASS):
         print("Cleared the form fields")
 
     def get_sas(self):
-        #token = str(self.importToken.text()) if self.importToken.text() else str(self.exportToken.text())
         headers = {"Authorization": f"Bearer {self.token}"}
         response = requests.get(url=f"{ImportExportWindow.endpoint}/api/gis/v1/qgis/get-sas", headers=headers)
         print(f"Response message from sas: {response.json()}")
@@ -111,13 +110,33 @@ class ImportExportWindow(QtWidgets.QDialog, FORM_IMPORT_EXPORT_CLASS):
         return sas
 
 
+    def validateLicense(self):
+        print("Validating license")
+        try:
+            url = str(self.importURL.text())
+            organisation_id = url.split('/')[5]
+            headers = {"Authorization": f"Bearer {self.token}"}
+            license_url = f"{ImportExportWindow.endpoint}/api/license/v1/organisations/{organisation_id}/tier-features"
+            response = requests.get(url=license_url, headers=headers)
+            print(f"Response message from license: {response}")
+            if response.status_code == 200:
+                response_json = response.json()
+                print(f"Response message from license: {response_json}")
+                parse_names = {item.get("parseName") for item in response_json.get("data", [])}
+                print(f"Return : {'qgis_plugin' in parse_names}")
+                return "qgis_plugin" in parse_names
+            return False
+        except Exception as e:
+            print(f"Error in validating license: {e}")
+            return False
+
+
     def getRasterDict(self):
         file_url = str(self.importURL.text())
         url_parts = file_url.split('/')
         organisation_id = url_parts[5]
         site_id = url_parts[7]
         survey_id = url_parts[9]
-        #token = str(self.importToken.text())
         headers = {"Authorization": f"Bearer {self.token}"}
         raster_url = f"{ImportExportWindow.endpoint}/api/core/v1/organisations/{organisation_id}/sites/{site_id}/surveys/{survey_id}/rasters"
         response = requests.get(url=raster_url, headers=headers)
@@ -130,96 +149,101 @@ class ImportExportWindow(QtWidgets.QDialog, FORM_IMPORT_EXPORT_CLASS):
         organisation_id = url_parts[5]
         site_id = url_parts[7]
         survey_id = url_parts[9]
-        #token = str(self.importToken.text())
         headers = {"Authorization": f"Bearer {self.token}"}
         raster_url = f"{ImportExportWindow.endpoint}/api/core/v1/organisations/{organisation_id}/sites/{site_id}/surveys/{survey_id}/vectors"
         response = requests.get(url=raster_url, headers=headers)
         return response
     
+
     def fetchQGISData(self):
-        try:
-            raster_layers = []
-            vector_layers = []
-            self.exportRasterList.clear()
-            self.exportVectorList.clear()
-            # Accessing the current project
-            project = QgsProject.instance()
-            # Getting all layers in the project
-            #layers1 = project.mapLayers()
-            layers = {name: layer for name, layer in project.mapLayers().items() if not layer.source().startswith("/vsicurl/")}
-            print(f"Layers new : {layers}")
-            for layer_id, layer in layers.items():
-                print(f"Layer: {layers.items()}")
-                if isinstance(layer, QgsRasterLayer):
-                    raster_layers.append(layer.name())
-                    print(f"Raster layers: {layer.name()}")
-                elif isinstance(layer, QgsVectorLayer):
-                    vector_layers.append(layer.name())
-                    print(f"Vector layers: {layer.name()}")
-            for values in raster_layers:
-                item = QListWidgetItem(values)
-                item.setFlags(item.flags() | QtCore.Qt.ItemIsUserCheckable)
-                item.setCheckState(QtCore.Qt.Unchecked)
-                self.exportRasterList.addItem(item)
-                print('Raster layers: ', values)
-            for vector_values in vector_layers:
-                vector_item = QListWidgetItem(vector_values)
-                vector_item.setFlags(vector_item.flags() | QtCore.Qt.ItemIsUserCheckable)
-                vector_item.setCheckState(QtCore.Qt.Unchecked)
-                self.exportVectorList.addItem(vector_item)
-                print('Vector layers: ', vector_values)
-            
-            # Show the group box after populating the ListView
-            self.exportFileListGroupBox.setVisible(True)
-            print("Fetched data from Qgis")
-        except Exception as e:
-            print(f"Error in fetching data from QGIS: {e}")
-            iface.messageBar().pushMessage(f"Error in fetching data from QGIS", level=2, duration=5)
+        if self.validateLicense():
+            try:
+                raster_layers = []
+                vector_layers = []
+                self.exportRasterList.clear()
+                self.exportVectorList.clear()
+                # Accessing the current project
+                project = QgsProject.instance()
+                # Getting all layers in the project
+                layers = {name: layer for name, layer in project.mapLayers().items() if not layer.source().startswith("/vsicurl/")}
+                print(f"Layers new : {layers}")
+                for layer_id, layer in layers.items():
+                    print(f"Layer: {layers.items()}")
+                    if isinstance(layer, QgsRasterLayer):
+                        raster_layers.append(layer.name())
+                        print(f"Raster layers: {layer.name()}")
+                    elif isinstance(layer, QgsVectorLayer):
+                        vector_layers.append(layer.name())
+                        print(f"Vector layers: {layer.name()}")
+                for values in raster_layers:
+                    item = QListWidgetItem(values)
+                    item.setFlags(item.flags() | QtCore.Qt.ItemIsUserCheckable)
+                    item.setCheckState(QtCore.Qt.Unchecked)
+                    self.exportRasterList.addItem(item)
+                    print('Raster layers: ', values)
+                for vector_values in vector_layers:
+                    vector_item = QListWidgetItem(vector_values)
+                    vector_item.setFlags(vector_item.flags() | QtCore.Qt.ItemIsUserCheckable)
+                    vector_item.setCheckState(QtCore.Qt.Unchecked)
+                    self.exportVectorList.addItem(vector_item)
+                    print('Vector layers: ', vector_values)
+                
+                # Show the group box after populating the ListView
+                self.exportFileListGroupBox.setVisible(True)
+                print("Fetched data from Qgis")
+            except Exception as e:
+                print(f"Error in fetching data from QGIS: {e}")
+                iface.messageBar().pushMessage(f"Error in fetching data from QGIS", level=2, duration=5)
+                self.clear()
+        else:
+            iface.messageBar().pushMessage(f"User does not have a valid license to proceed. Please contact the administrator", level=2, duration=5)
             self.clear()
-            #self.close()
         
 
     def fetchSkydeckData(self):
-        try:    
-            global rasters_dict
-            global vectors_dict
-            print("Clicked on connect")
-            self.importRasterList.clear()
-            self.importVectorList.clear()
-            raster_response = self.getRasterDict()
-            rasters_dict = raster_response.json()
-            raster_names = []
-            print(f"Response message from skydeck raster: {raster_response}")
-            for raster in rasters_dict["data"]["rasters"]:
-                raster_names.append(raster["name"])
-            for values in raster_names:
-                item = QListWidgetItem(values)
-                item.setFlags(item.flags() | QtCore.Qt.ItemIsUserCheckable)
-                item.setCheckState(QtCore.Qt.Unchecked)
-                self.importRasterList.addItem(item)
+        if self.validateLicense():
+            try:    
+                global rasters_dict
+                global vectors_dict
+                print("Clicked on connect")
+                self.importRasterList.clear()
+                self.importVectorList.clear()
+                raster_response = self.getRasterDict()
+                rasters_dict = raster_response.json()
+                raster_names = []
+                print(f"Response message from skydeck raster: {raster_response}")
+                for raster in rasters_dict["data"]["rasters"]:
+                    raster_names.append(raster["name"])
+                for values in raster_names:
+                    item = QListWidgetItem(values)
+                    item.setFlags(item.flags() | QtCore.Qt.ItemIsUserCheckable)
+                    item.setCheckState(QtCore.Qt.Unchecked)
+                    self.importRasterList.addItem(item)
 
 
-            vectors_response = self.getVectorDict()
-            vectors_dict = vectors_response.json()
-            vector_names = []
-            print(f"Response message from skydeck vector: {vectors_response}")
-            for vector in vectors_dict["data"]["vectors"]:
-                vector_names.append(vector["name"])
-            for vector_values in vector_names:
-                vector_item = QListWidgetItem(vector_values)
-                vector_item.setFlags(vector_item.flags() | QtCore.Qt.ItemIsUserCheckable)
-                vector_item.setCheckState(QtCore.Qt.Unchecked)
-                self.importVectorList.addItem(vector_item)
+                vectors_response = self.getVectorDict()
+                vectors_dict = vectors_response.json()
+                vector_names = []
+                print(f"Response message from skydeck vector: {vectors_response}")
+                for vector in vectors_dict["data"]["vectors"]:
+                    vector_names.append(vector["name"])
+                for vector_values in vector_names:
+                    vector_item = QListWidgetItem(vector_values)
+                    vector_item.setFlags(vector_item.flags() | QtCore.Qt.ItemIsUserCheckable)
+                    vector_item.setCheckState(QtCore.Qt.Unchecked)
+                    self.importVectorList.addItem(vector_item)
 
 
-            # Show the group box after populating the ListView
-            self.importFileListGroupBox.setVisible(True)
-            print("Fetched data from Skydeck")
-        except Exception as e:
-            print(f"Error in fetching data from Skydeck: {e}")
-            iface.messageBar().pushMessage(f"Error in fetching data from Skydeck", level=2, duration=5)
+                # Show the group box after populating the ListView
+                self.importFileListGroupBox.setVisible(True)
+                print("Fetched data from Skydeck")
+            except Exception as e:
+                print(f"Error in fetching data from Skydeck: {e}")
+                iface.messageBar().pushMessage(f"Error in fetching data from Skydeck", level=2, duration=5)
+                self.clear()
+        else:
+            iface.messageBar().pushMessage(f"User does not have a valid license to proceed. Please contact the administrator", level=2, duration=5)
             self.clear()
-            #self.close()
 
 
     def addQGISLayer(self):
@@ -230,7 +254,6 @@ class ImportExportWindow(QtWidgets.QDialog, FORM_IMPORT_EXPORT_CLASS):
                 item = self.importRasterList.item(i)
                 if item.checkState() == QtCore.Qt.Checked:
                     print(f"Item checked: {item.text()}")
-                    #file_url = self.getdownloadURL(item.text(), rasters_dict)
                     for raster in rasters_dict["data"]["rasters"]:
                         if raster["name"] == item.text():
                             file_url = raster["cogeotiff"]["downloadUrl"]
@@ -252,7 +275,6 @@ class ImportExportWindow(QtWidgets.QDialog, FORM_IMPORT_EXPORT_CLASS):
                 vector_item = self.importVectorList.item(i)
                 if vector_item.checkState() == QtCore.Qt.Checked:
                     print(f"vecter Item checked: {vector_item.text()}")
-                    #file_url = self.getdownloadURL(item.text(), rasters_dict)
                     for vector in vectors_dict["data"]["vectors"]:
                         if vector["name"] == vector_item.text():
                             vector_file_url = vector["geojson"]["downloadUrl"]
@@ -276,7 +298,6 @@ class ImportExportWindow(QtWidgets.QDialog, FORM_IMPORT_EXPORT_CLASS):
             print(f"Error in adding layer: {e}")
             iface.messageBar().pushMessage(f"Error in adding layer", level=2, duration=5)
             self.clear()
-            #self.close()
 
 
     def uploadToSkydeck(self):
@@ -289,7 +310,6 @@ class ImportExportWindow(QtWidgets.QDialog, FORM_IMPORT_EXPORT_CLASS):
             organisation_id = url_parts[5]
             site_id = url_parts[7]
             survey_id = url_parts[9]
-            #token = str(self.exportToken.text())
             headers = {"Authorization": f"Bearer {self.token}"}
 
             for i in range(self.exportRasterList.count()):
@@ -407,7 +427,6 @@ class ImportExportWindow(QtWidgets.QDialog, FORM_IMPORT_EXPORT_CLASS):
                     iface.messageBar().pushMessage(f"Error in uploading the vector ", level=2, duration=5)
 
             self.clear()
-            #self.close()
             print("Closed")
         except Exception as e:  
             print(f"Error in uploading data to Skydeck: {e}")
