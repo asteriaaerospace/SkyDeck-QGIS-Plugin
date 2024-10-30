@@ -196,7 +196,7 @@ class ImportExportWindow(QtWidgets.QDialog, FORM_IMPORT_EXPORT_CLASS):
                 iface.messageBar().pushMessage(f"Error in fetching data from QGIS", level=2, duration=5)
                 self.clear()
         else:
-            iface.messageBar().pushMessage(f"User does not have a valid license to proceed. Please contact the administrator", level=2, duration=5)
+            iface.messageBar().pushMessage(f"The current subscription plan for this SkyDeck account does not support this action. Please check your subscription details or contact support for assistance.", level=2, duration=5)
             self.clear()
         
 
@@ -242,7 +242,7 @@ class ImportExportWindow(QtWidgets.QDialog, FORM_IMPORT_EXPORT_CLASS):
                 iface.messageBar().pushMessage(f"Error in fetching data from Skydeck", level=2, duration=5)
                 self.clear()
         else:
-            iface.messageBar().pushMessage(f"User does not have a valid license to proceed. Please contact the administrator", level=2, duration=5)
+            iface.messageBar().pushMessage(f"The current subscription plan for this SkyDeck account does not support this action. Please check your subscription details or contact support for assistance.", level=2, duration=5)
             self.clear()
 
 

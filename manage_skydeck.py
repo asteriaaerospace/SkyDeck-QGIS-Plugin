@@ -263,7 +263,7 @@ class ManageSkydeck:
             if response.json() is not True:
                 print("RBAC Failed")
                 self.import_export_window.skydeckLogout()
-                iface.messageBar().pushMessage(f"UNAUTHORISED USER", level=2, duration=5)
+                iface.messageBar().pushMessage(f"You don’t have permission to access this data. Please contact your account administrator to request access", level=2, duration=5)
             else:
                 print("RBAC Success")
                 self.import_export_window.show()
