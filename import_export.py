@@ -4,7 +4,6 @@ import sys
 import platform
 import subprocess
 import tempfile
-from osgeo import gdal
 import urllib.parse
 import importlib
 
@@ -241,18 +240,13 @@ class ImportExportWindow(QtWidgets.QDialog, FORM_IMPORT_EXPORT_CLASS):
                     # if not file_url.startswith("/vsicurl/"):
                     #     file_url = "/vsicurl/" + file_url +"?"+ sas
                     #     print("Final File URL: ", file_url)
-
-                    # Set GDAL configuration options
-                    gdal.SetConfigOption('GDAL_HTTP_UNSAFESSL', 'YES')  # If you are using self-signed certificates
-                    gdal.SetConfigOption('GDAL_HTTP_TIMEOUT', '30')  # Set a timeout for HTTP requests
-                    gdal.SetConfigOption('CPL_DEBUG', 'ON')
-                    gdal.SetConfigOption('GDAL_CACHEMAX', '512')
                     url = file_url + "?" + sas
                     encoded_url = urllib.parse.quote(url, safe=':/?&=%')
-
+                    print("encoded URL: ", encoded_url)
                     raster_layer = QgsRasterLayer(f"/vsicurl/{encoded_url}", layer_name, "gdal")
                     if not raster_layer.isValid():
                         print(f"Error: Unable to load raster layer from {file_url}")
+                        iface.messageBar().pushMessage(f"Error: Unable to load raster layer from skydeck", level=2, duration=5)
                     else:
                         # Add the raster layer to the map
                         QgsProject.instance().addMapLayer(raster_layer)
@@ -274,6 +268,7 @@ class ImportExportWindow(QtWidgets.QDialog, FORM_IMPORT_EXPORT_CLASS):
                     vector_layer = QgsVectorLayer(vector_file_url, vector_layer_name, "ogr")
                     if not vector_layer.isValid():
                         print(f"Error: Unable to load vector layer from {vector_file_url}")
+                        iface.messageBar().pushMessage(f"Error: Unable to load vector layer from skydeck", level=2, duration=5)
                     else:
                         # Add the raster layer to the map
                         QgsProject.instance().addMapLayer(vector_layer)
