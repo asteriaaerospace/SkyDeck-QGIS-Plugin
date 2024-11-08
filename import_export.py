@@ -4,6 +4,8 @@ import sys
 import platform
 import subprocess
 import tempfile
+from osgeo import gdal
+import urllib.parse
 import importlib
 
 from PyQt5 import QtCore
@@ -236,10 +238,19 @@ class ImportExportWindow(QtWidgets.QDialog, FORM_IMPORT_EXPORT_CLASS):
                             file_url = raster["cogeotiff"]["downloadUrl"]
                             print("File URL: ", file_url)
                     layer_name = str(item.text())
-                    if not file_url.startswith("/vsicurl/"):
-                        file_url = "/vsicurl/" + file_url +"?"+ sas
-                        print("Final File URL: ", file_url)
-                    raster_layer = QgsRasterLayer(file_url, layer_name, "gdal")
+                    # if not file_url.startswith("/vsicurl/"):
+                    #     file_url = "/vsicurl/" + file_url +"?"+ sas
+                    #     print("Final File URL: ", file_url)
+
+                    # Set GDAL configuration options
+                    gdal.SetConfigOption('GDAL_HTTP_UNSAFESSL', 'YES')  # If you are using self-signed certificates
+                    gdal.SetConfigOption('GDAL_HTTP_TIMEOUT', '30')  # Set a timeout for HTTP requests
+                    gdal.SetConfigOption('CPL_DEBUG', 'ON')
+                    gdal.SetConfigOption('GDAL_CACHEMAX', '512')
+                    url = file_url + "?" + sas
+                    encoded_url = urllib.parse.quote(url, safe=':/?&=%')
+
+                    raster_layer = QgsRasterLayer(f"/vsicurl/{encoded_url}", layer_name, "gdal")
                     if not raster_layer.isValid():
                         print(f"Error: Unable to load raster layer from {file_url}")
                     else:
