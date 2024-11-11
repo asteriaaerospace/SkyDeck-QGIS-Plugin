@@ -4,6 +4,7 @@ import sys
 import platform
 import subprocess
 import tempfile
+import urllib.parse
 import importlib
 
 from PyQt5 import QtCore
@@ -236,12 +237,16 @@ class ImportExportWindow(QtWidgets.QDialog, FORM_IMPORT_EXPORT_CLASS):
                             file_url = raster["cogeotiff"]["downloadUrl"]
                             print("File URL: ", file_url)
                     layer_name = str(item.text())
-                    if not file_url.startswith("/vsicurl/"):
-                        file_url = "/vsicurl/" + file_url +"?"+ sas
-                        print("Final File URL: ", file_url)
-                    raster_layer = QgsRasterLayer(file_url, layer_name, "gdal")
+                    # if not file_url.startswith("/vsicurl/"):
+                    #     file_url = "/vsicurl/" + file_url +"?"+ sas
+                    #     print("Final File URL: ", file_url)
+                    url = file_url + "?" + sas
+                    encoded_url = urllib.parse.quote(url, safe=':/?&=%')
+                    print("encoded URL: ", encoded_url)
+                    raster_layer = QgsRasterLayer(f"/vsicurl/{encoded_url}", layer_name, "gdal")
                     if not raster_layer.isValid():
                         print(f"Error: Unable to load raster layer from {file_url}")
+                        iface.messageBar().pushMessage(f"Error: Unable to load raster layer from skydeck", level=2, duration=5)
                     else:
                         # Add the raster layer to the map
                         QgsProject.instance().addMapLayer(raster_layer)
@@ -263,6 +268,7 @@ class ImportExportWindow(QtWidgets.QDialog, FORM_IMPORT_EXPORT_CLASS):
                     vector_layer = QgsVectorLayer(vector_file_url, vector_layer_name, "ogr")
                     if not vector_layer.isValid():
                         print(f"Error: Unable to load vector layer from {vector_file_url}")
+                        iface.messageBar().pushMessage(f"Error: Unable to load vector layer from skydeck", level=2, duration=5)
                     else:
                         # Add the raster layer to the map
                         QgsProject.instance().addMapLayer(vector_layer)
