@@ -17,12 +17,12 @@
    <iconset>
     <normaloff>icon.png</normaloff>icon.png</iconset>
   </property>
-  <widget class="QWebView" name="skydeckwebView">
+  <widget class="QWebEngineView" name="skydeckWebEngineView">
    <property name="geometry">
     <rect>
-     <x>-10</x>
-     <y>0</y>
-     <width>721</width>
+     <x>-1</x>
+     <y>-1</y>
+     <width>711</width>
      <height>631</height>
     </rect>
    </property>
@@ -35,9 +35,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QWebView</class>
+   <class>QWebEngineView</class>
    <extends>QWidget</extends>
-   <header location="global">QtWebKitWidgets/QWebView</header>
+   <header location="global">QtWebEngineWidgets/QWebEngineView</header>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -21,8 +21,11 @@
  *                                                                         *
  ***************************************************************************/
 """
+from PyQt5.QtCore import Qt, QCoreApplication
+QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
+from PyQt5.QtWebEngineWidgets import QWebEngineView
 
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QUrl
+from qgis.PyQt.QtCore import QSettings, QTranslator, QUrl
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QListWidgetItem
 from qgis.core import QgsRasterLayer, QgsProject, QgsVectorLayer, QgsRasterFileWriter, QgsRasterPipe, QgsCoordinateReferenceSystem, QgsVectorFileWriter
@@ -224,16 +227,18 @@ class ManageSkydeck:
         # This slot is called when the web page has finished loading.
         if ok:
             print("Page loaded successfully. Processing the page.")
-            frame = self.web_view.page().mainFrame()
-            url = frame.url().toString()
-            print(url)
-            parsed_url = urlparse(url)
-            query_params = parse_qs(parsed_url.query)
-            token = query_params.get('token', [None])[0]
-            print(f"Token: {token}")
-            self.handle_token(token)
+            self.web_view.page().toHtml(self.process_page)
         else:
             print("Failed to load page")
+
+    def process_page(self, html):
+        url = self.web_view.url().toString()
+        print(url)
+        parsed_url = urlparse(url)
+        query_params = parse_qs(parsed_url.query)
+        token = query_params.get('token', [None])[0]
+        print(f"Token: {token}")
+        self.handle_token(token)
 
 
     def handle_token(self, token):
@@ -272,8 +277,7 @@ class ManageSkydeck:
             self.dlg.close()
 
     def get_existing_token(self):
-            frame = self.web_view.page().mainFrame()
-            url = frame.url().toString()
+            url = self.web_view.url().toString()
             print(url)
             parsed_url = urlparse(url)
             query_params = parse_qs(parsed_url.query)
@@ -285,7 +289,7 @@ class ManageSkydeck:
     def open_web_page(self):
         try:
             print("Opening Skydeck login page")
-            self.web_view = self.dlg.skydeckwebView
+            self.web_view = self.dlg.skydeckWebEngineView
             token = self.get_existing_token()
             if token:
                 print("Token exists")
