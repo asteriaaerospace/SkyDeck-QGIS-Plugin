@@ -21,6 +21,15 @@
  *                                                                         *
  ***************************************************************************/
 """
+import os.path
+import requests
+import tempfile
+import sys
+import os
+import platform
+import subprocess
+from urllib.parse import urlparse, parse_qs
+
 current_path = os.getcwd()
 subprocess.run(["cd", current_path], shell=True)
 subprocess.run(['pip', 'install', 'pyjwt'], shell=True)
@@ -41,17 +50,6 @@ from .resources import *
 
 from .manage_skydeck_dialog import ManageSkydeckDialog
 from .import_export import ImportExportWindow
-import os.path
-import requests
-import tempfile
-import sys
-import os
-import platform
-import subprocess
-from urllib.parse import urlparse, parse_qs
-
-
-
 
 
 try:
