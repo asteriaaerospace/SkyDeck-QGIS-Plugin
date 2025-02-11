@@ -21,18 +21,6 @@
  *                                                                         *
  ***************************************************************************/
 """
-
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QUrl
-from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction, QListWidgetItem
-from qgis.core import QgsRasterLayer, QgsProject, QgsVectorLayer, QgsRasterFileWriter, QgsRasterPipe, QgsCoordinateReferenceSystem, QgsVectorFileWriter
-from qgis.utils import iface
-
-
-from .resources import *
-
-from .manage_skydeck_dialog import ManageSkydeckDialog
-from .import_export import ImportExportWindow
 import os.path
 import requests
 import tempfile
@@ -42,33 +30,53 @@ import platform
 import subprocess
 from urllib.parse import urlparse, parse_qs
 
-
 current_path = os.getcwd()
 subprocess.run(["cd", current_path], shell=True)
 subprocess.run(['pip', 'install', 'pyjwt'], shell=True)
-
+subprocess.run(['pip', 'install', 'PyQt5'], shell=True)
 
 try:
+    from PyQt5.QtCore import Qt, QCoreApplication
+    QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
+    from PyQt5.QtWebEngineWidgets import QWebEngineView
     from azure.storage.blob import BlobServiceClient
     import jwt
 except ImportError:
     if platform.system() == 'Linux':
         subprocess.run(['pip', 'install', 'azure-storage-blob'])
         subprocess.run(['pip', 'install', 'pyjwt'])
+        subprocess.run(['pip', 'install', 'PyQtWebEngine'])
+
     elif platform.system() == 'Darwin':
         current_path = sys.executable
         last_slash_index = current_path.rfind('/')
         install_path = current_path[:last_slash_index]
         subprocess.run([install_path+'/bin/pip3', 'install', 'azure-storage-blob'])
         subprocess.run([install_path+'/bin/pip3', 'install', 'pyjwt'])
+        subprocess.run([install_path+'/bin/pip3', 'install', 'PyQtWebEngine'])
     else:
         current_path = os.getcwd()
         subprocess.run(["cd", current_path], shell=True)
         subprocess.run(['pip', 'install', 'azure-storage-blob'], shell=True)
         subprocess.run(['pip', 'install', 'pyjwt'], shell=True)
+        subprocess.run(['pip', 'install', 'PyQtWebEngine'], shell=True)
 finally:
+    from PyQt5.QtWebEngineWidgets import QWebEngineView
     from azure.storage.blob import BlobServiceClient
     import jwt
+
+from qgis.PyQt.QtCore import QSettings, QTranslator, QUrl
+from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtWidgets import QAction, QListWidgetItem
+from qgis.core import QgsRasterLayer, QgsProject, QgsVectorLayer, QgsRasterFileWriter, QgsRasterPipe, QgsCoordinateReferenceSystem, QgsVectorFileWriter
+from qgis.utils import iface
+
+from .resources import *
+from .manage_skydeck_dialog import ManageSkydeckDialog
+from .import_export import ImportExportWindow
+
+
+
 
 
 
@@ -224,16 +232,18 @@ class ManageSkydeck:
         # This slot is called when the web page has finished loading.
         if ok:
             print("Page loaded successfully. Processing the page.")
-            frame = self.web_view.page().mainFrame()
-            url = frame.url().toString()
-            print(url)
-            parsed_url = urlparse(url)
-            query_params = parse_qs(parsed_url.query)
-            token = query_params.get('token', [None])[0]
-            print(f"Token: {token}")
-            self.handle_token(token)
+            self.web_view.page().toHtml(self.process_page)
         else:
             print("Failed to load page")
+
+    def process_page(self, html):
+        url = self.web_view.url().toString()
+        print(url)
+        parsed_url = urlparse(url)
+        query_params = parse_qs(parsed_url.query)
+        token = query_params.get('token', [None])[0]
+        print(f"Token: {token}")
+        self.handle_token(token)
 
 
     def handle_token(self, token):
@@ -272,8 +282,7 @@ class ManageSkydeck:
             self.dlg.close()
 
     def get_existing_token(self):
-            frame = self.web_view.page().mainFrame()
-            url = frame.url().toString()
+            url = self.web_view.url().toString()
             print(url)
             parsed_url = urlparse(url)
             query_params = parse_qs(parsed_url.query)
@@ -285,7 +294,7 @@ class ManageSkydeck:
     def open_web_page(self):
         try:
             print("Opening Skydeck login page")
-            self.web_view = self.dlg.skydeckwebView
+            self.web_view = self.dlg.skydeckWebEngineView
             token = self.get_existing_token()
             if token:
                 print("Token exists")
