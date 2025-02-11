@@ -21,6 +21,11 @@
  *                                                                         *
  ***************************************************************************/
 """
+current_path = os.getcwd()
+subprocess.run(["cd", current_path], shell=True)
+subprocess.run(['pip', 'install', 'pyjwt'], shell=True)
+subprocess.run(['pip', 'install', 'PyQt5'], shell=True)
+
 from PyQt5.QtCore import Qt, QCoreApplication
 QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
 from PyQt5.QtWebEngineWidgets import QWebEngineView
@@ -46,9 +51,7 @@ import subprocess
 from urllib.parse import urlparse, parse_qs
 
 
-current_path = os.getcwd()
-subprocess.run(["cd", current_path], shell=True)
-subprocess.run(['pip', 'install', 'pyjwt'], shell=True)
+
 
 
 try:
