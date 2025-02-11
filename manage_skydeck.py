@@ -35,9 +35,34 @@ subprocess.run(["cd", current_path], shell=True)
 subprocess.run(['pip', 'install', 'pyjwt'], shell=True)
 subprocess.run(['pip', 'install', 'PyQt5'], shell=True)
 
-from PyQt5.QtCore import Qt, QCoreApplication
-QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
-from PyQt5.QtWebEngineWidgets import QWebEngineView
+try:
+    from PyQt5.QtCore import Qt, QCoreApplication
+    QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
+    from PyQt5.QtWebEngineWidgets import QWebEngineView
+    from azure.storage.blob import BlobServiceClient
+    import jwt
+except ImportError:
+    if platform.system() == 'Linux':
+        subprocess.run(['pip', 'install', 'azure-storage-blob'])
+        subprocess.run(['pip', 'install', 'pyjwt'])
+        subprocess.run(['pip', 'install', 'PyQtWebEngine'])
+
+    elif platform.system() == 'Darwin':
+        current_path = sys.executable
+        last_slash_index = current_path.rfind('/')
+        install_path = current_path[:last_slash_index]
+        subprocess.run([install_path+'/bin/pip3', 'install', 'azure-storage-blob'])
+        subprocess.run([install_path+'/bin/pip3', 'install', 'pyjwt'])
+        subprocess.run([install_path+'/bin/pip3', 'install', 'PyQtWebEngine'])
+    else:
+        current_path = os.getcwd()
+        subprocess.run(["cd", current_path], shell=True)
+        subprocess.run(['pip', 'install', 'azure-storage-blob'], shell=True)
+        subprocess.run(['pip', 'install', 'pyjwt'], shell=True)
+        subprocess.run(['pip', 'install', 'PyQtWebEngine'], shell=True)
+finally:
+    from azure.storage.blob import BlobServiceClient
+    import jwt
 
 from qgis.PyQt.QtCore import QSettings, QTranslator, QUrl
 from qgis.PyQt.QtGui import QIcon
@@ -45,34 +70,12 @@ from qgis.PyQt.QtWidgets import QAction, QListWidgetItem
 from qgis.core import QgsRasterLayer, QgsProject, QgsVectorLayer, QgsRasterFileWriter, QgsRasterPipe, QgsCoordinateReferenceSystem, QgsVectorFileWriter
 from qgis.utils import iface
 
-
 from .resources import *
-
 from .manage_skydeck_dialog import ManageSkydeckDialog
 from .import_export import ImportExportWindow
 
 
-try:
-    from azure.storage.blob import BlobServiceClient
-    import jwt
-except ImportError:
-    if platform.system() == 'Linux':
-        subprocess.run(['pip', 'install', 'azure-storage-blob'])
-        subprocess.run(['pip', 'install', 'pyjwt'])
-    elif platform.system() == 'Darwin':
-        current_path = sys.executable
-        last_slash_index = current_path.rfind('/')
-        install_path = current_path[:last_slash_index]
-        subprocess.run([install_path+'/bin/pip3', 'install', 'azure-storage-blob'])
-        subprocess.run([install_path+'/bin/pip3', 'install', 'pyjwt'])
-    else:
-        current_path = os.getcwd()
-        subprocess.run(["cd", current_path], shell=True)
-        subprocess.run(['pip', 'install', 'azure-storage-blob'], shell=True)
-        subprocess.run(['pip', 'install', 'pyjwt'], shell=True)
-finally:
-    from azure.storage.blob import BlobServiceClient
-    import jwt
+
 
 
 
