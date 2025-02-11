@@ -61,6 +61,7 @@ except ImportError:
         subprocess.run(['pip', 'install', 'pyjwt'], shell=True)
         subprocess.run(['pip', 'install', 'PyQtWebEngine'], shell=True)
 finally:
+    from PyQt5.QtWebEngineWidgets import QWebEngineView
     from azure.storage.blob import BlobServiceClient
     import jwt
 
