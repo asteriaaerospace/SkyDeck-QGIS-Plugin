@@ -301,7 +301,7 @@ class ManageSkydeck:
                 self.handle_token(token)
             else:
                 self.dlg.show()
-                self.web_view.load(QUrl(f"https://skydeck.asteria.co.in/auth/login"))
+                self.web_view.load(QUrl(f"https://skydeck.asteria.co.in/"))
                 self.web_view.urlChanged.connect(self.on_url_changed)
         except Exception as e:
             print(f"Error : {e}")
