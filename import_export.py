@@ -44,8 +44,8 @@ FORM_IMPORT_EXPORT_CLASS, _ = uic.loadUiType(os.path.join(
 
 class ImportExportWindow(QtWidgets.QDialog, FORM_IMPORT_EXPORT_CLASS):
 
-    endpoint = "https://skydeck.asteria.co.in"
-    blob_endpoint = "https://skydeckcorefilestrgprd.blob.core.windows.net"
+    endpoint = "https://staging.skydeck.tech"
+    blob_endpoint = "https://sdcorefilestrgstg.blob.core.windows.net"
 
     def __init__(self,token, webView, parent=None):
         super(ImportExportWindow, self).__init__(parent)
@@ -75,7 +75,7 @@ class ImportExportWindow(QtWidgets.QDialog, FORM_IMPORT_EXPORT_CLASS):
             self.webView.urlChanged.disconnect()
             self.webView.loadFinished.disconnect()
 
-            self.webView.load(QUrl(f"https://skydeck.asteria.co.in/auth/logout"))
+            self.webView.load(QUrl(f"https://staging.skydeck.tech/auth/logout"))
             iface.messageBar().pushMessage(f"Logged out successfully", level=3, duration=5)
 
             print("Closed the plugin")
