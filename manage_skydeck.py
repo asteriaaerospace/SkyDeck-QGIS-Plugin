@@ -31,9 +31,28 @@ import subprocess
 from urllib.parse import urlparse, parse_qs
 
 current_path = os.getcwd()
-subprocess.run(["cd", current_path], shell=True)
-subprocess.run(['pip', 'install', 'pyjwt'], shell=True)
-subprocess.run(['pip', 'install', 'PyQt5'], shell=True)
+
+def install_package(package):
+
+    if platform.system() == 'Linux':
+        subprocess.run(['pip', 'install', package])
+
+    elif platform.system() == 'Darwin':
+        current_path = sys.executable
+        last_slash_index = current_path.rfind('/')
+        install_path = current_path[:last_slash_index]
+        subprocess.run([install_path+'/bin/pip3', 'install', package])
+    else:
+        current_path = os.getcwd()
+        subprocess.run(["cd", current_path], shell=True)
+        subprocess.run(['pip', 'install', package], shell=True)
+
+required_packages = ['PyJWT==2.10.1', 'PyQt5==5.15.11', 'azure-storage-blob==12.24.1', 'PyQtWebEngine==5.15.7', 'pip-system-certs==4.0']
+for package in required_packages:
+    try:
+        __import__(package)
+    except ImportError:
+        install_package(package)
 
 try:
     from PyQt5.QtCore import Qt, QCoreApplication
@@ -42,28 +61,8 @@ try:
     from azure.storage.blob import BlobServiceClient
     import jwt
 except ImportError:
-    if platform.system() == 'Linux':
-        subprocess.run(['pip', 'install', 'azure-storage-blob'])
-        subprocess.run(['pip', 'install', 'pyjwt'])
-        subprocess.run(['pip', 'install', 'PyQtWebEngine'])
-
-    elif platform.system() == 'Darwin':
-        current_path = sys.executable
-        last_slash_index = current_path.rfind('/')
-        install_path = current_path[:last_slash_index]
-        subprocess.run([install_path+'/bin/pip3', 'install', 'azure-storage-blob'])
-        subprocess.run([install_path+'/bin/pip3', 'install', 'pyjwt'])
-        subprocess.run([install_path+'/bin/pip3', 'install', 'PyQtWebEngine'])
-    else:
-        current_path = os.getcwd()
-        subprocess.run(["cd", current_path], shell=True)
-        subprocess.run(['pip', 'install', 'azure-storage-blob'], shell=True)
-        subprocess.run(['pip', 'install', 'pyjwt'], shell=True)
-        subprocess.run(['pip', 'install', 'PyQtWebEngine'], shell=True)
-finally:
-    from PyQt5.QtWebEngineWidgets import QWebEngineView
-    from azure.storage.blob import BlobServiceClient
-    import jwt
+    print(f"Error importing packages: {e}")
+    sys.exit(1)
 
 from qgis.PyQt.QtCore import QSettings, QTranslator, QUrl
 from qgis.PyQt.QtGui import QIcon
@@ -75,16 +74,10 @@ from .resources import *
 from .manage_skydeck_dialog import ManageSkydeckDialog
 from .import_export import ImportExportWindow
 
-
-
-
-
-
-
 class ManageSkydeck:
     """QGIS Plugin Implementation."""
 
-    endpoint = "https://skydeck.asteria.co.in"
+    endpoint = "https://app.skydeck.tech"
     blob_endpoint = "https://skydeckcorefilestrgprd.blob.core.windows.net"
 
     def __init__(self, iface):
@@ -225,7 +218,7 @@ class ManageSkydeck:
 
     def on_url_changed(self, url):
         url_string = url.toString()
-        if "auth.asteria.co.in" not in url_string:
+        if "auth.skydeck.tech" not in url_string:
             self.web_view.loadFinished.connect(self.on_load_finished)
 
     def on_load_finished(self, ok):
@@ -265,7 +258,7 @@ class ManageSkydeck:
             rbac_data = {"email": email, "sub": sub}
             print(f"Email: {email}, Sub: {sub}")
             headers = {"Authorization": f"Bearer {token}"}
-            response = requests.post(url="https://skydeck.asteria.co.in/api/gis/v1/qgis/rbac", headers=headers, json=rbac_data)
+            response = requests.post(url=f"{ManageSkydeck.endpoint}/api/gis/v1/qgis/rbac", headers=headers, json=rbac_data)
             print(f"Response message from rbac: {response}")
             print(f"Response : {response.json()}")
             self.dlg.close()
@@ -301,7 +294,7 @@ class ManageSkydeck:
                 self.handle_token(token)
             else:
                 self.dlg.show()
-                self.web_view.load(QUrl(f"https://skydeck.asteria.co.in/auth/login"))
+                self.web_view.load(QUrl(f"https://app.skydeck.tech/auth/login"))
                 self.web_view.urlChanged.connect(self.on_url_changed)
         except Exception as e:
             print(f"Error : {e}")
