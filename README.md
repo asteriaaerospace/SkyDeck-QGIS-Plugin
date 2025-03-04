@@ -22,4 +22,9 @@ QGIS installed
 Installation steps:
 
 Open Plugin Manager and search for SkyGIS plugin and install it.
-And restart QGIS so that changes in environment take effect.    
+And restart QGIS so that changes in environment take effect.  
+
+For testing on stage environment:
+
+1. Download the zip file from https://github.com/asteriaaerospace/SkyDeck-QGIS-Plugin/tree/staging 
+2. Open Plugin Manager in QGIS and use install from zip option
