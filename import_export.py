@@ -302,7 +302,7 @@ class ImportExportWindow(QtWidgets.QDialog, FORM_IMPORT_EXPORT_CLASS):
                 item = self.exportRasterList.item(i)
                 if item.checkState() == QtCore.Qt.Checked:
                     print(f"Item checked: {item.text()}")
-                    raster_file_path = tempfile.NamedTemporaryFile(suffix=".tiff")
+                    raster_file_path = tempfile.NamedTemporaryFile(suffix=".tiff", delete=False)
                     EPSG = 'EPSG:25832'
                     project = QgsProject.instance()
                     rlayer = project.mapLayersByName(item.text())[0]
@@ -318,7 +318,7 @@ class ImportExportWindow(QtWidgets.QDialog, FORM_IMPORT_EXPORT_CLASS):
                 vector_item = self.exportVectorList.item(i)
                 if vector_item.checkState() == QtCore.Qt.Checked:
                     print(f"Vector Item checked: {vector_item.text()}")
-                    vector_file_path = tempfile.NamedTemporaryFile(suffix=".geojson")
+                    vector_file_path = tempfile.NamedTemporaryFile(suffix=".geojson", delete=False)
                     project = QgsProject.instance()
                     vlayer = project.mapLayersByName(vector_item.text())[0]
                     QgsVectorFileWriter.writeAsVectorFormat(vlayer, vector_file_path.name, "utf-8", vlayer.crs(), "GeoJSON")
