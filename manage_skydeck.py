@@ -30,29 +30,12 @@ import platform
 import subprocess
 from urllib.parse import urlparse, parse_qs
 
-current_path = os.getcwd()
+# Add local 'libs' directory to sys.path
+plugin_dir = os.path.dirname(__file__)
+libs_dir = os.path.join(plugin_dir, 'libs')
 
-def install_package(package):
-
-    if platform.system() == 'Linux':
-        subprocess.run(['pip', 'install', package])
-
-    elif platform.system() == 'Darwin':
-        current_path = sys.executable
-        last_slash_index = current_path.rfind('/')
-        install_path = current_path[:last_slash_index]
-        subprocess.run([install_path+'/bin/pip3', 'install', package])
-    else:
-        current_path = os.getcwd()
-        subprocess.run(["cd", current_path], shell=True)
-        subprocess.run(['pip', 'install', package], shell=True)
-
-required_packages = ['PyJWT==2.10.1', 'PyQt5==5.15.11', 'azure-storage-blob==12.24.1', 'PyQtWebEngine==5.15.7', 'pip-system-certs==4.0']
-for package in required_packages:
-    try:
-        __import__(package)
-    except ImportError:
-        install_package(package)
+if libs_dir not in sys.path:
+    sys.path.insert(0, libs_dir)
 
 try:
     from PyQt5.QtCore import Qt, QCoreApplication
@@ -60,8 +43,8 @@ try:
     from PyQt5.QtWebEngineWidgets import QWebEngineView
     from azure.storage.blob import BlobServiceClient
     import jwt
-except ImportError:
-    print(f"Error importing packages: {e}")
+except ImportError as e:
+    print(f"Error importing packages : {e}")
     sys.exit(1)
 
 from qgis.PyQt.QtCore import QSettings, QTranslator, QUrl
@@ -95,7 +78,7 @@ class ManageSkydeck:
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
         # initialize locale
-        locale = QSettings().value('locale/userLocale')[0:2]
+        locale = str(QSettings().value('locale/userLocale'))[0:2]
         locale_path = os.path.join(
             self.plugin_dir,
             'i18n',
