@@ -18,26 +18,7 @@ from qgis.core import QgsRasterLayer, QgsProject, QgsVectorLayer, QgsRasterFileW
 from qgis.PyQt.QtWidgets import QListWidgetItem
 from qgis.utils import iface
 from qgis.PyQt.QtCore import QUrl
-from PyQt5.QtWebKitWidgets import QWebPage
-
-try:
-    from azure.storage.blob import BlobServiceClient
-except ImportError:
-    if platform.system() == 'Linux':
-        subprocess.run(['pip', 'install', 'azure-storage-blob'])
-    elif platform.system() == 'Darwin':
-        current_path = sys.executable
-        last_slash_index = current_path.rfind('/')
-        install_path = current_path[:last_slash_index]
-        subprocess.run([install_path+'/bin/pip3', 'install', 'azure-storage-blob'])
-    else:
-        current_path = os.getcwd()
-        subprocess.run(["cd", current_path], shell=True)
-        subprocess.run(['pip', 'install', 'azure-storage-blob'], shell=True)
-finally:
-    from azure.storage.blob import BlobServiceClient
-
-
+from azure.storage.blob import BlobServiceClient
 
 FORM_IMPORT_EXPORT_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'ImportExportFiles.ui'))
