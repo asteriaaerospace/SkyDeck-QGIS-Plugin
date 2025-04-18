@@ -44,7 +44,20 @@ try:
     from azure.storage.blob import BlobServiceClient
     import jwt
 except ImportError as e:
-    print(f"Error importing packages : {e}")
+    from PyQt5.QtWidgets import QMessageBox
+    msg = QMessageBox()
+    msg.setIcon(QMessageBox.Critical)
+    msg.setWindowTitle("Missing Dependency")
+    msg.setText("The required module <b>PyQt5.QtWebEngineWidgets</b> is not installed.")
+    msg.setInformativeText("""Please install it manually using the below steps:
+        On Windows:
+            1. Open Start Menu and search for `OSGeo4W Shell`.
+            2. Run the following command:
+                pip install PyQtWebEngine
+            3. Restart QGIS and try again.
+                           """)
+    msg.exec_()
+    raise ImportError("Missing PyQt5.QtWebEngineWidgets. Please install it with: pip install PyQtWebEngine")
     sys.exit(1)
 
 from qgis.PyQt.QtCore import QSettings, QTranslator, QUrl
