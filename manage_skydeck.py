@@ -29,30 +29,66 @@ import os
 import platform
 import subprocess
 from urllib.parse import urlparse, parse_qs
+import importlib
+from PyQt5.QtWidgets import QMessageBox
 
 current_path = os.getcwd()
 
 def install_package(package):
-
-    if platform.system() == 'Linux':
-        subprocess.run(['pip', 'install', package])
-
-    elif platform.system() == 'Darwin':
-        current_path = sys.executable
-        last_slash_index = current_path.rfind('/')
-        install_path = current_path[:last_slash_index]
-        subprocess.run([install_path+'/bin/pip3', 'install', package])
-    else:
-        current_path = os.getcwd()
-        subprocess.run(["cd", current_path], shell=True)
-        subprocess.run(['pip', 'install', package], shell=True)
-
-required_packages = ['PyJWT==2.10.1', 'PyQt5==5.15.11', 'azure-storage-blob==12.24.1', 'PyQtWebEngine==5.15.7', 'pip-system-certs==4.0']
-for package in required_packages:
+    print(f"Installing {package}...")
     try:
-        __import__(package)
+        if platform.system() == 'Linux':
+            subprocess.run(['pip', 'install', package], check=True)
+
+        elif platform.system() == 'Darwin':
+            current_path = sys.executable
+            last_slash_index = current_path.rfind('/')
+            install_path = current_path[:last_slash_index]
+            subprocess.run([install_path+'/bin/pip3', 'install', package], check=True)
+        else:
+            current_path = os.getcwd()
+            subprocess.run(["cd", current_path], shell=True)
+            subprocess.run(['pip', 'install', package], shell=True, check=True)
+
+    except subprocess.CalledProcessError as e:
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Critical)
+        msg.setWindowTitle("Installation Failed")
+        msg.setText(f"Failed to install package: {package}")
+        msg.setInformativeText(f"""Error: {str(e)}: Please install it manually using steps below:")
+        On Windows:
+            1. Open Start Menu and search for `OSGeo4W Shell`.
+            2. Run the following command:
+                pip install "{package}"
+            3. Restart QGIS and try again.
+                           """)
+        msg.exec_()
+        sys.exit(1)
+
+required_packages = {
+    'jwt': 'PyJWT==2.10.1',
+    'PyQt5': 'PyQt5==5.15.11',
+    'azure.storage.blob': 'azure-storage-blob==12.24.1',
+    'PyQt5.QtWebEngineWidgets': 'PyQtWebEngine==5.15.7',
+    'pip_system_certs': 'pip-system-certs==4.0'
+}
+restart_needed = False
+for import_name, pip_name in required_packages.items():
+    try:
+        importlib.import_module(import_name)
     except ImportError:
-        install_package(package)
+        print(f"Module {import_name} not found. Installing {pip_name}...")
+        install_package(pip_name)
+        restart_needed = True
+
+if restart_needed:
+    msg = QMessageBox()
+    msg.setIcon(QMessageBox.Information)
+    msg.setWindowTitle("Restart Required")
+    msg.setText("One or more Python packages were installed.")
+    msg.setInformativeText("Please restart QGIS to complete plugin initialization.")
+    msg.exec_()
+    #sys.exit(1)
 
 try:
     from PyQt5.QtCore import Qt, QCoreApplication
@@ -60,9 +96,10 @@ try:
     from PyQt5.QtWebEngineWidgets import QWebEngineView
     from azure.storage.blob import BlobServiceClient
     import jwt
-except ImportError:
-    print(f"Error importing packages: {e}")
-    sys.exit(1)
+except ImportError as e:
+    print(f"Error importing required modules: {e}")
+    #sys.exit(1)
+
 
 from qgis.PyQt.QtCore import QSettings, QTranslator, QUrl
 from qgis.PyQt.QtGui import QIcon
@@ -95,7 +132,7 @@ class ManageSkydeck:
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
         # initialize locale
-        locale = QSettings().value('locale/userLocale')[0:2]
+        locale = str(QSettings().value('locale/userLocale'))[0:2]
         locale_path = os.path.join(
             self.plugin_dir,
             'i18n',

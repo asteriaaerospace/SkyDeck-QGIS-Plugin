@@ -16,15 +16,31 @@ An active SkyDeck account is required to use this plugin. Discover [SkyDeck](htt
 "Stable" releases are available through the official QGIS plugins repository.
 
 Prerequisites:
-QGIS installed
+QGIS 3.40 or greater installed
 
 
 Installation steps:
 
 Open Plugin Manager and search for SkyGIS plugin and install it.
-And restart QGIS so that changes in environment take effect.  
+And restart QGIS so that changes in environment take effect.    
 
-For testing on stage environment:
+## Troubleshooting: Missing `PyQt5.QtWebEngineWidgets`
+
+#### On Windows:
+1. Open **Start Menu** and search for `OSGeo4W Shell`.
+2. Run the following command:
+   pip install PyQtWebEngine
+3. Restart QGIS and try again.
+
+#### On Linux:
+1. Open your system terminal.
+2. Run the following command:
+   pip install PyQtWebEngine
+3. Restart QGIS and try again.
+
+  
+## For testing on stage environment:
 
 1. Download the zip file from https://github.com/asteriaaerospace/SkyDeck-QGIS-Plugin/tree/staging 
 2. Open Plugin Manager in QGIS and use install from zip option
+
