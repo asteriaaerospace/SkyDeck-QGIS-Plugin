@@ -88,7 +88,7 @@ if restart_needed:
     msg.setText("One or more Python packages were installed.")
     msg.setInformativeText("Please restart QGIS to complete plugin initialization.")
     msg.exec_()
-    sys.exit(1)
+    #sys.exit(1)
 
 try:
     from PyQt5.QtCore import Qt, QCoreApplication
@@ -98,7 +98,7 @@ try:
     import jwt
 except ImportError as e:
     print(f"Error importing required modules: {e}")
-    sys.exit(1)
+    #sys.exit(1)
 
 from qgis.PyQt.QtCore import QSettings, QTranslator, QUrl
 from qgis.PyQt.QtGui import QIcon
