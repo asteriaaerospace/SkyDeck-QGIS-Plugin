@@ -37,3 +37,10 @@ And restart QGIS so that changes in environment take effect.
 2. Run the following command:
    pip install PyQtWebEngine
 3. Restart QGIS and try again.
+
+  
+## For testing on stage environment:
+
+1. Download the zip file from https://github.com/asteriaaerospace/SkyDeck-QGIS-Plugin/tree/staging 
+2. Open Plugin Manager in QGIS and use install from zip option
+

@@ -100,6 +100,7 @@ except ImportError as e:
     print(f"Error importing required modules: {e}")
     #sys.exit(1)
 
+
 from qgis.PyQt.QtCore import QSettings, QTranslator, QUrl
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QListWidgetItem
@@ -113,8 +114,8 @@ from .import_export import ImportExportWindow
 class ManageSkydeck:
     """QGIS Plugin Implementation."""
 
-    endpoint = "https://staging.skydeck.tech"
-    blob_endpoint = "https://sdcorefilestrgstg.blob.core.windows.net"
+    endpoint = "https://app.skydeck.tech"
+    blob_endpoint = "https://skydeckcorefilestrgprd.blob.core.windows.net"
 
     def __init__(self, iface):
         """Constructor.
@@ -254,7 +255,7 @@ class ManageSkydeck:
 
     def on_url_changed(self, url):
         url_string = url.toString()
-        if "authdevstg.skydeck.tech" not in url_string:
+        if "auth.skydeck.tech" not in url_string:
             self.web_view.loadFinished.connect(self.on_load_finished)
 
     def on_load_finished(self, ok):
@@ -330,7 +331,7 @@ class ManageSkydeck:
                 self.handle_token(token)
             else:
                 self.dlg.show()
-                self.web_view.load(QUrl(f"https://staging.skydeck.tech/auth/login"))
+                self.web_view.load(QUrl(f"https://app.skydeck.tech/auth/login"))
                 self.web_view.urlChanged.connect(self.on_url_changed)
         except Exception as e:
             print(f"Error : {e}")
